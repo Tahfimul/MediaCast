@@ -1,0 +1,182 @@
+
+<html>
+  <head>
+    <!-- Shaka Player ui compiled library: -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.4.2/shaka-player.ui.min.js" integrity="sha512-+VSwzkhwiGUg7ZAl/5eoLHpZoY2aXCbUc3EvdX2qdLxafDrdNq7ZD+tD40zyJEKbrGDRHK5L+h8ys0lSZeoAFA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Shaka Player ui compiled library default CSS: -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.4.2/controls.min.css" integrity="sha512-t4K06bi0RcRW6M6E96OlsxLigoRqK9h+3DWO1ES9MaecUk2dSgtMV6dNH3m20yRSjjPfyPQDzbwBW+w2iykCyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Chromecast SDK (if you want Chromecast support for your app): -->
+    <script defer src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+    <!-- Your application source: -->
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <h1 id='loading'>Player is Loading...</h1>
+    <h1 id='error'></h1>
+    <!-- The data-shaka-player-container tag will make the UI library place the controls in this div.
+         The data-shaka-player-cast-receiver-id tag allows you to provide a Cast Application ID that
+           the cast button will cast to; the value provided here is the sample cast receiver. -->
+    <div data-shaka-player-container style="max-width:40em"
+         data-shaka-player-cast-receiver-id="07AEE832">
+       <!-- The data-shaka-player tag will make the UI library use this video element.
+            If no video is provided, the UI will automatically make one inside the container div. -->
+      <video autoplay="true" muted="muted" data-shaka-player id="video" style="width:100%;height:100%"></video>
+    </div>
+    
+
+      
+     <script>
+       
+	const manifestUri =
+    		'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
+
+	var video = null;
+	var ui = null;
+	var controls = null;
+	var player = null;
+	
+	
+
+     	// client code here
+     	var socket = io.connect('http://127.0.0.1:3000/');
+      	socket.on('playNew', function(ManifestURI) {
+
+		loadVideoIntoPlayer(ManifestURI);
+		video = document.getElementById('video');
+		console.log(video.currentTime);
+      	});
+        	socket.on('play', function(message) {
+      		onPlay();
+
+      	});
+	socket.on('pause', function(message) {
+      		onPause();
+
+      	});
+
+	async function init() {
+  		// When using the UI, the player is made automatically by the UI object.
+  		video = document.getElementById('video');
+  		ui = video['ui'];
+ 	 	controls = ui.getControls();
+  		player = controls.getPlayer();
+  		const loading_msg = document.getElementById('loading');
+  		loading_msg.innerHTML = '';
+
+ 	
+  		video.addEventListener('playing', onPlaying);
+
+  		// Attach player and ui to the window to make it easy to access in the JS console.
+  		window.player = player;
+  		window.ui = ui;
+
+  		// Listen for error events.
+  		player.addEventListener('error', onPlayerErrorEvent);
+  		controls.addEventListener('error', onUIErrorEvent);
+
+  		video.addEventListener('play', onPlay);
+  		video.addEventListener('pause', onPause);
+
+	}
+
+	async function loadVideoIntoPlayer(manifestUri)
+	{
+		const loading_msg = document.getElementById('loading');
+  		loading_msg.innerHTML = 'Player is Loading...';
+		// Try to load a manifest.
+  		// This is an asynchronous process.
+  		try {
+    			await player.load(manifestUri).then
+				(playVideo);
+
+    
+    			// This runs if the asynchronous load is successful.
+    			console.log('The video has now been loaded!');
+  		} catch (error) {
+    			onPlayerError(error);
+			console.log("error occured");
+  		}
+
+		loading_msg.innerHTML = '';
+	}
+
+	function playVideo()
+	{
+		var element = document.getElementById('video');
+    		var event = new Event('play');
+    		element.dispatchEvent(event);
+	}
+
+	function pauseVideo()
+	{
+		var element = document.getElementById('video');
+    		var event = new Event('pause');
+    		element.dispatchEvent(event);
+	}
+
+	function seekToTime(video)
+	{
+		video.currentTime = 5;
+	}
+	
+
+	function onPlaying()
+	{
+		console.log("PLaying");
+	}
+
+	function onPlay()
+	{
+  		console.log('tried playing');
+
+		video.play().then(function () {
+  			console.log("success");
+  			// autoplay was successful!
+		}).catch(function (error) {
+   			console.log(error);
+  			// do something if you want to handle or track this error
+		});
+
+	}
+
+	function onPause()
+	{
+		video.pause();
+	}
+
+	function onPlayerErrorEvent(errorEvent) {
+  		// Extract the shaka.util.Error object from the event.
+  		onPlayerError(event.detail);
+	}
+
+	function onPlayerError(error) {
+  		// Handle player error
+  		const err =  document.getElementById('error');
+  
+  		err.innerHTML = 'Error while loading video';
+  		console.error('Error code', error.code, 'object', error);
+	}
+
+	function onUIErrorEvent(errorEvent) {
+  		// Extract the shaka.util.Error object from the event.
+  		onPlayerError(event.detail);
+	}
+
+	function initFailed(errorEvent) {
+  		// Handle the failure to load; errorEvent.detail.reasonCode has a
+  		// shaka.ui.FailReasonCode describing why.
+  		console.error('Unable to load the UI library!');
+	}
+	
+	// Listen to the custom shaka-ui-loaded event, to wait until the UI is loaded.
+	document.addEventListener('shaka-ui-loaded', init);
+	// Listen to the custom shaka-ui-load-failed event, in case Shaka Player fails
+	// to load (e.g. due to lack of browser support).
+	document.addEventListener('shaka-ui-load-failed', initFailed);
+
+
+
+    </script>
+	
+  </body>
+</html>
