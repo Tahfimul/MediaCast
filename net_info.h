@@ -22,9 +22,14 @@ namespace tl
 			info_header<T> header{};
 			std::vector<uint8_t> body;
 
-			size_t size() const
+			/*size_t size() const
 			{
 				return sizeof(info_header<T>) + body.size();
+			}*/
+
+			size_t size() const
+			{
+				return body.size();
 			}
 
 			//Overide for std::cout compatability - produces friendly description of data
@@ -113,7 +118,7 @@ namespace tl
 		template <typename T>
 		class owned_info
 		{
-		private:
+		public:
 			//The server may need to respond back to the client and for that it needs to know where the client contacted the server 
 			//from, so essentially this shared_ptr serves as a tag to the client.
 			//This shared_ptr can also be used as a tag for the client to tag and communicate with the server. However, that is 

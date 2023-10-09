@@ -75,6 +75,10 @@ namespace tl
 					//To prevent anything else from running while adding item to back of queue
 					std::scoped_lock lock(muxQueue);
 					deqQueue.emplace_back(std::move(item));
+
+					//To signal cvBlocking variable to wake up when an item is added to back of the queue
+					std::unique_lock<std::mutex> ul(muxBlocking);
+					cvBlocking.notify_one();
 				}
 
 				//Adds item to front of Queue
@@ -84,6 +88,10 @@ namespace tl
 					//To prevent anything else from running while adding item to front of queue
 					std::scoped_lock lock(muxQueue);
 					deqQueue.emplace_front(std::move(item));
+
+					//To signal cvBlocking variable to wake up when an item is added at front of the queue
+					std::unique_lock<std::mutex> ul(muxBlocking);
+					cvBlocking.notify_one();
 				}
 
 				//Returns if Queue has no items
@@ -132,6 +140,20 @@ namespace tl
 					return t; 
 				}
 
+				void wait()
+				{
+					while (empty())
+					{
+						std::unique_lock<std::mutex> ul(muxBlocking);
+						//Sends the thread to sleep
+						//cvBlocking will wait here until something
+						//signals the cvBlocking variable to wake up
+						//Two things can signal this cvBlocking object to wake up
+						//1. Ourselves
+						//2. Spurious wakeup
+						cvBlocking.wait(ul);
+					}
+				}
 
 
 
@@ -142,6 +164,9 @@ namespace tl
 				//This is a standard double ended queue
 				std::deque<T> deqQueue;
 
+				std::condition_variable cvBlocking;
+				//Used to protext the cvBlocking variable
+				std::mutex muxBlocking;
 		};
 	}
 }
