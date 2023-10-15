@@ -5,6 +5,7 @@
 #include "net_info.h"
 #include "net_threadsafeQueue.hpp"
 #include "net_connection.h"
+#include "user_command.h"
 
 namespace tl
 {
@@ -13,7 +14,7 @@ namespace tl
 		//This class is responsible for setting up ASIO and Connection.
 		//It also acts as an accesspoint for the application to talk to 
 		//the server.
-		template <typename T>
+		template <typename T, typename U>
 		class client_interface
 		{
 		
@@ -99,8 +100,29 @@ namespace tl
 			//Send info to server
 			void Send(const info<T>& info)
 			{
+				std::cout<<"sent request\n";
 				if (IsConnected())
 					m_connection->Send(info);
+			}
+
+			void addToUserCommands(U command_id)
+			{
+				user_command<U> user_command{};
+				user_command.id = command_id;
+				
+				//The command_id object prints the value with no problem
+				std::cout<<"the command id:\n"<< command_id<<std::endl;
+
+				m_nUserCommands.push_back(user_command);
+
+				std::cout<<"m_nUserCommands.size(): "<<m_nUserCommands.size()<<std::endl;
+				
+			}
+
+			threadsafeQueue<user_command<U>>& UserCommands()
+			{
+				// std::cout<<"user commands\t"<<m_nUserCommands.empty()<<std::endl;
+				return m_nUserCommands;
 			}
 
 
@@ -123,6 +145,8 @@ namespace tl
 		private:
 			//This is the thread safe queue of the incoming infos from server.
 			threadsafeQueue<owned_info<T>> m_qInfosIn;
+			threadsafeQueue<user_command<U>> m_nUserCommands; 
+			
 		};
 	}
 }

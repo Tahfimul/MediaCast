@@ -125,11 +125,11 @@ namespace tl
 			//redundant since the client already will know the endpoint to connect to in order to communicate with the server.
 			std::shared_ptr<Connection<T>> remote = nullptr;
 			
-			info<T> info;
+			info<T> info_;
 
 			friend std::ostream& operator<<(std::ostream& os, const owned_info<T>& info)
 			{
-				os << info.info;
+				os << info.info_;
 				return os;
 			}
 			

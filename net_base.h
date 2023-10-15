@@ -11,6 +11,7 @@
 #include<algorithm>
 #include<chrono>
 #include<cstdint>
+#include <pthread.h>
 
 #define ASIO_STANDALONE
 #include<asio.hpp>

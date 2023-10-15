@@ -4,7 +4,6 @@
 #include "net_threadsafeQueue.hpp"
 #include "net_info.h"
 
-
 namespace tl
 {
 	namespace net
@@ -181,6 +180,7 @@ namespace tl
 			//ASYNC - Prime context ready to write an info header
 			void WriteHeader()
 			{
+				std::cout<<"writing header\n";
 				asio::async_write(m_socket, asio::buffer(&m_qInfosOut.front().header, sizeof(info_header<T>)),
 					[this](std::error_code ec, std::size_t length)
 					{
@@ -354,6 +354,7 @@ namespace tl
 			uint64_t m_nHandshakeIn = 0;
 			//The value used by server to compare whether the value is valid
 			uint64_t m_nHandshakeCheck = 0;
+			
 
 
 		};

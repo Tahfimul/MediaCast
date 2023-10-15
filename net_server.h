@@ -211,8 +211,8 @@ namespace tl
 				{
 					std::cout << "Calling OnInfo\n";
 					auto info = m_qInfosIn.pop_front();
-					std::cout << "info.remote " << info.remote << " info.info " << info.info << std::endl;
-					OnInfo(info.remote, info.info);
+					std::cout << "info.remote " << info.remote << " info.info_ " << info.info_ << std::endl;
+					OnInfo(info.remote, info.info_);
 					nInfoCount++;
 				}
 			}

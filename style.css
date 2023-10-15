@@ -1,0 +1,17 @@
+window
+{
+	background-color: teal;
+}
+
+.gridSpanFullHorizontal
+{
+	display: grid;
+	grid-column-start: 0;
+	grid-column-end: -1;
+}
+
+.widgetSpanFullHorizontal
+{
+	grid-row-start: 0;
+	grid-row-end: -1;
+}
